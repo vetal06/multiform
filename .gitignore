@@ -6,5 +6,5 @@ vendor
 exemple/vendor
 exemple/runtime
 
-composer.lock
 
+composer.lock
