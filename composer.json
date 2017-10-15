@@ -1,0 +1,30 @@
+{
+    "name": "vetal06/multiform",
+    "description": "Yii 2 multiform",
+    "type": "yii2-extension",
+    "authors": [
+        {
+            "name": "Skripnik Vitaliy",
+            "email": "bbssvv06@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "yiisoft/yii2": "^2.0",
+        "yiisoft/yii2-bootstrap": "*",
+        "kartik-v/yii2-widget-fileinput": "@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "vetal06\\multiform\\": "src/",
+            "vetal06\\multiform\\exemple\\": "exemple/"
+
+        }
+    },
+    "extra": {
+        "asset-installer-paths": {
+            "npm-asset-library": "vendor/npm",
+            "bower-asset-library": "vendor/bower"
+        }
+    }
+}
