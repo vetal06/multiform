@@ -79,7 +79,7 @@ class MultiFormBehavior extends Behavior
     protected function loadFormData(Model $model, $form, $data, $attribute, $key)
     {
         $formName =  (new \ReflectionClass($form))->getShortName();
-        $modelName = ($model)->getShortName();
+        $modelName = (new \ReflectionClass($model))->getShortName();
         $modelData = $data[$formName];
         if (!empty($modelData['id'])) {
             $form = $form->findOne(['id' => $modelData['id']]);
