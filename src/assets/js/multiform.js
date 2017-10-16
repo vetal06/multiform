@@ -65,6 +65,9 @@
 
                 getNewRowId: function (element) {
                     var rowData = element.find(this.rowSelector).last();
+                    if (rowData.length == 0) {
+                        return 1;
+                    }
                     return parseInt(rowData.attr('data-id-key')) + 1;
                 }
             };
