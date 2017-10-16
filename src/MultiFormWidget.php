@@ -45,16 +45,16 @@ class MultiFormWidget extends \yii\widgets\InputWidget
         foreach ($this->view->js as $position => $js) {
             $this->view->js[$position] = array_merge($js, empty($jsOld[$position])?[]:$jsOld[$position]);
         }
-        $jsRowString = Json::encode(implode(' ', $jsRow));
-        $rowContextEncode = Json::encode($rowContext);
 
         $view = $this->getView();
         MultiFormAssets::register($view);
+        $jsData = Json::encode([
+            'jsRowTemplate' => implode(' ', $jsRow),
+            'rowTemplate' => $rowContext,
+        ]);
         $view->registerJs("
-            MultiForm.widgetId = '#{$this->getId()}';
-            MultiForm.jsRowTemplate = {$jsRowString};
-            MultiForm.rowTemplate = {$rowContextEncode};
-            MultiForm.init();
+        $('#{$this->getId()}').MultiForm($jsData);
+           
         ");
         return Html::tag('div', $this->addButtonTemplate.$content, ['id' => $this->id]);
     }
