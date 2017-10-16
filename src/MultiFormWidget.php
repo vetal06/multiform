@@ -65,23 +65,25 @@ class MultiFormWidget extends \yii\widgets\InputWidget
         $attribute = $this->attribute;
         $model = $this->model;
         if (!empty($model->$attribute)) {
-            foreach ($model->$attribute as $modelData)
+            foreach ($model->$attribute as $data)
             {
-                $rowKey = $this->getKey();
-                $rowContext = $this->template;
-                foreach ($this->columns as $attribute => $column) {
-                    $field = $this->createChildrenField($column, $rowKey);
-                    $field->model->load($modelData);
-                    $rowContext = str_replace("{{$attribute}}", $field->render(), $rowContext);
+                foreach ($data as $modelData) {
+                    $rowKey = $this->getKey();
+                    $rowContext = $this->template;
+                    foreach ($this->columns as $attribute => $column) {
+                        $field = $this->createChildrenField($column, $rowKey);
+                        $field->model->setAttributes($modelData);
+                        $rowContext = str_replace("{{$attribute}}", $field->render(), $rowContext);
+                    }
+                    $fullContent .= $this->renderRow($rowContext, $rowKey);
                 }
-                $fullContent .= $this->renderRow($rowContext, $rowKey);
             }
         }
         return $fullContent;
 
     }
 
-    private function createChildrenField($column, $rowKey)
+    protected function createChildrenField($column, $rowKey)
     {
         return \Yii::createObject(array_merge([
             'class' => $this->childrenFieldClass,

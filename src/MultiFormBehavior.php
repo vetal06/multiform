@@ -2,10 +2,10 @@
 namespace vetal06\multiform;
 
 
-use common\db\ActiveRecord;
-use common\helpers\ArrayHelper;
 use yii\base\Behavior;
 use yii\base\Model;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\web\UploadedFile;
 
 class MultiFormBehavior extends Behavior
@@ -17,12 +17,15 @@ class MultiFormBehavior extends Behavior
     public function events()
     {
         return [
-            ActiveRecord::EVENT_AFTER_UPDATE => 'afterUpdate',
+            ActiveRecord::EVENT_AFTER_UPDATE => 'updateData',
+            ActiveRecord::EVENT_AFTER_INSERT => 'insertData',
             ActiveRecord::EVENT_AFTER_FIND => 'afterFind',
+            ActiveRecord::EVENT_BEFORE_DELETE => 'deleteAllData',
+
         ];
     }
 
-    public function afterUpdate()
+    public function updateData()
     {
         $model = $this->owner;
         foreach ($this->attributeProperty as $attribute => $formModelClass) {
@@ -37,16 +40,31 @@ class MultiFormBehavior extends Behavior
         }
     }
 
+    public function insertData()
+    {
+        $model = $this->owner;
+        foreach ($this->attributeProperty as $attribute => $formModelClass) {
+            if(!empty($model->$attribute)) {
+                foreach ($model->$attribute as $key => $data) {
+                    $formModel = \Yii::createObject($formModelClass);
+                    $dataModel = $this->loadFormData($model, $formModel, $data, $attribute, $key);
+                    $dataModel->save();
+                }
+            }
+        }
+    }
+
     public function afterFind()
     {
         $model = $this->owner;
         foreach ($this->attributeProperty as $attribute => $formModelClass) {
             $formModel = \Yii::createObject($formModelClass);
+            $formName =  (new \ReflectionClass($formModel))->getShortName();
             $fkModels = $formModel->findAll([$this->getFkAttribute($attribute) => $model->id]);
             $resArray = [];
             foreach ($fkModels as $m)
             {
-                $resArray[$formModel->getClassNameShort()][] = $m->getAttributes();
+                $resArray[$formName][] = $m->getAttributes();
             }
             $model->$attribute = $resArray;
         }
@@ -60,7 +78,9 @@ class MultiFormBehavior extends Behavior
      */
     protected function loadFormData(Model $model, $form, $data, $attribute, $key)
     {
-        $modelData = $data[$form->getClassNameShort()];
+        $formName =  (new \ReflectionClass($form))->getShortName();
+        $modelName = ($model)->getShortName();
+        $modelData = $data[$formName];
         if (!empty($modelData['id'])) {
             $form = $form->findOne(['id' => $modelData['id']]);
         } else {
@@ -70,7 +90,7 @@ class MultiFormBehavior extends Behavior
         $form->load($data);
         // load instance
         foreach ($modelData as $attr => $attrData) {
-            $fileInputName = "{$model->getClassNameShort()}[$attribute][$key][{$form->getClassNameShort()}][$attr]";
+            $fileInputName = "{$modelName}[$attribute][$key][{$formName}][$attr]";
             if ($fileInstance = UploadedFile::getInstanceByName($fileInputName)) {
                 $form->load([
                     $attr => $fileInstance
@@ -78,8 +98,6 @@ class MultiFormBehavior extends Behavior
             }
 
         }
-//        var_dump($form->file_image);
-//        exit;
         return $form;
 
     }
@@ -94,7 +112,8 @@ class MultiFormBehavior extends Behavior
     {
         $formModel = \Yii::createObject($formModelClass);
         $dataIds = ArrayHelper::getColumn($model->$attribute, function($row) use ($formModel){
-            return $row[$formModel->getClassNameShort()]['id'];
+            $formName =  (new \ReflectionClass($formModel))->getShortName();
+            return $row[$formName]['id'];
         });
         $fkAttribute = $this->getFkAttribute($attribute);
         if (empty($dataIds)) {
@@ -103,6 +122,16 @@ class MultiFormBehavior extends Behavior
             $formModel->deleteAll(['and', $fkAttribute => $model->id, ['not in', 'id', $dataIds]]);
         }
 
+    }
+
+    public function deleteAllData()
+    {
+        $model = $this->owner;
+        foreach ($this->attributeProperty as $attribute => $formModelClass) {
+            $formModel = \Yii::createObject($formModelClass);
+            $fkAttribute = $this->getFkAttribute($attribute);
+            $formModel->deleteAll([$fkAttribute => $model->id]);
+        }
     }
 
     /**
