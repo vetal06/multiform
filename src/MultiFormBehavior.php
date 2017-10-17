@@ -119,7 +119,7 @@ class MultiFormBehavior extends Behavior
         if (empty($dataIds)) {
             $formModel->deleteAll([$fkAttribute => $model->id]);
         } else {
-            $formModel->deleteAll(['and', $fkAttribute => $model->id, ['not in', 'id', $dataIds]]);
+            $formModel->deleteAll(['and', "$fkAttribute = :id", ['not in', 'id', $dataIds]], [':id' => $model->id]);
         }
 
     }
@@ -130,7 +130,7 @@ class MultiFormBehavior extends Behavior
         foreach ($this->attributeProperty as $attribute => $formModelClass) {
             $formModel = \Yii::createObject($formModelClass);
             $fkAttribute = $this->getFkAttribute($attribute);
-            $formModel->deleteAll([$fkAttribute => $model->id]);
+            $formModel->deleteAll("$fkAttribute = :id", [':id' => $model->id]);
         }
     }
 
