@@ -25,8 +25,6 @@ class MultiFormWidget extends \yii\widgets\InputWidget
 
     public function run()
     {
-
-
         $rowContext = $this->template;
         $rowKey = $this->getKey();
         $jsOld = $this->view->js;
@@ -37,13 +35,13 @@ class MultiFormWidget extends \yii\widgets\InputWidget
         }
         $rowContext = $this->renderRow($rowContext, $rowKey);
         $content = $rowContext;
-        $contentExist = $this->renderExistData();
-        if (!empty($contentExist)) {
-            $content = $contentExist;
-        }
         $jsRow = isset($this->view->js[View::POS_READY])?$this->view->js[View::POS_READY]:'';
         foreach ($this->view->js as $position => $js) {
             $this->view->js[$position] = array_merge($js, empty($jsOld[$position])?[]:$jsOld[$position]);
+        }
+        $contentExist = $this->renderExistData();
+        if (!empty($contentExist)) {
+            $content = $contentExist;
         }
 
         $view = $this->getView();
