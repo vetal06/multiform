@@ -80,6 +80,9 @@ class MultiFormBehavior extends Behavior
     {
         $formName =  (new \ReflectionClass($form))->getShortName();
         $modelName = (new \ReflectionClass($model))->getShortName();
+        if (empty($data[$formName])) {
+            return $form;
+        }
         $modelData = $data[$formName];
         if (!empty($modelData['id'])) {
             $form = $form->findOne(['id' => $modelData['id']]);
@@ -113,7 +116,7 @@ class MultiFormBehavior extends Behavior
         $formModel = \Yii::createObject($formModelClass);
         $dataIds = ArrayHelper::getColumn($model->$attribute, function($row) use ($formModel){
             $formName =  (new \ReflectionClass($formModel))->getShortName();
-            return $row[$formName]['id'];
+            return empty($row[$formName])?'':$row[$formName]['id'];
         });
         $fkAttribute = $this->getFkAttribute($attribute);
         if (empty($dataIds)) {
