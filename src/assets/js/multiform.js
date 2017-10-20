@@ -41,6 +41,8 @@
 
                         });
                         element.append(rowData);
+                        var buttonAdd = element.find(_t.addSelector).detach();
+                        element.append(buttonAdd);
                         _t.registerJs(rowData, newRowId);
                     });
                 },

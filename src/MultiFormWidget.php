@@ -54,7 +54,7 @@ class MultiFormWidget extends \yii\widgets\InputWidget
         $('#{$this->getId()}').MultiForm($jsData);
            
         ");
-        return Html::tag('div', $this->addButtonTemplate.$content, ['id' => $this->id]);
+        return Html::tag('div', $content.$this->addButtonTemplate, ['id' => $this->id]);
     }
 
     public function renderExistData()
